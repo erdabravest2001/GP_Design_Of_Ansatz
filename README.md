@@ -1,1 +1,1 @@
-# Bayesian_Search_VQE
+# Using Classical Gaussian Processes to Design Ansatzes 

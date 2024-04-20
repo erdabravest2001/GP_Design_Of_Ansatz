@@ -1,12 +1,19 @@
 ---
-title: "Estimation of Ro-Vibrational Eigenphases Using Bayesian Inference Enhanced Quantum Computing"
-author: "STAT 447C Final Project: Ethan Rajkumar, #55024616"
+title: "Estimation of Ro-Vibrational Eigenphases Using Bayesian Quantum Phase Estimation"
+subtitle: "STAT 447C Final Project: Ethan Rajkumar, #55024616"
+output: 
+  pdf_document: 
+    latex_engine: xelatex
+geometry: 
+  - top=15mm
+  - bottom=20mm
+  - left=20mm
+  - right=20mm
 header-includes:
   - \usepackage{amsmath, amssymb, amsthm, tcolorbox}
   - \usepackage{geometry}
   - \usepackage{algorithm}
   - \usepackage{algpseudocode}
-  - \usepackage{tgadventor} # Custom font package
   - \usepackage{fancyhdr}
   - \usepackage{indentfirst}
   - \usepackage{multicol}
@@ -29,38 +36,29 @@ header-includes:
   - \newmdtheoremenv{definition}{Definition}
 bibliography: tex/manuscript.bib
 ---
-### \underline{Abstract}
-### \underline{Ro-vibrational Eigenvlaue Problem Formulation} {-}
+\vspace{-1.8cm}
+## \underline{Abstract}
+## \underline{Ro-vibrational Eigenvlaue Problem Formulation} {-}
 To analyze molecular characteristics, chemists often solve the following eigenvalue equation:
-
 \begin{align}
     \mathbf{H}_{RV} \Psi(\vec{\theta}) &= E_0 \Psi(\vec{\theta})
 \end{align}
-
 In this equation, $\mathbf{H}_{RV}$ represents the Hamiltonian that accounts for the molecule's total ro-vibrational energy. The wavefunction $\Psi$, parameterized by the vector $\vec{\theta}$, serves as the eigenvector. The energy level $E_0$ corresponds to the lowest ground state energy that electrons can occupy. While simpler molecules like H$_2$ allow for straightforward single vector decompositions, larger molecules present computational challenges due to the increased size of $\mathbf{H}_{RV}$. 
-
 Asnaashari et al.  employed a hybrid quantum-classical computing approach to address this eigenvalue problem, using a greedy induced point sampling algorithm to compute an expectation in their respective basis \cite{asnaashari2023compact}. However, they encountered significant scalability issues related to the time complexity of quantum circuit generation, denoted by $\mathcal{O}(\sum_k n \cdot M_k)$, where $M$ represents the time required to generate an expectation value per iteration over $n$ samples, and $k$ denotes the iteration index.
-
-To overcome this scaling issue, this work implements a phase estimation algorithm enhanced by Bayesian Optimization to solve the eignevalue problem instead. This method was evaluated on a dichromium gas (Cr$_2$) model, using data from a discrete variable representation of the Hamiltonian.
-
-###  \underline{Background}  {-}
-Taking the ro-vibrational Hamiltonian $\mathbf{H}_{RV}$ and performing the following operation to form a matrix $\mathcal{U}$ gives:  
-\[
-  \mathcal{U} = e^{i \mathbf{H}_{RV} t}
-\]
+To overcome this scaling issue, this work implements a phase estimation algorithm enhanced by Bayesian Optimization to solve the eignevalue problem instead. This method was evaluated on a dichromium gas (Cr$_2$) model, using data from a discrete variable representation of the Hamiltonian. 
+##  \underline{Background}  {-} \\
+Taking the ro-vibrational Hamiltonian $\mathbf{H}_{RV}$ and performing the following operation to form a matrix $\mathcal{U}$ gives \(\mathcal{U} = e^{i \mathbf{H}_{RV} t} \).
 The expression above allows for the application of the phase estimation algorithm, which estimates the eigenvalues of the unitary operators. The algorithm then uses these eigenvalues to approximate the eigenvalues of the original Hamiltonian. A matrix is denoted to be unitary if it follows the spectral theorem which is listed below.
-
 \begin{mdframed}
 \textbf{Spectral Theorem:}
 Let \( U \) be a normalized \( K \times K \) complex matrix. There exists an orthonormal basis of \( K \)-dimensional complex vectors \( \{|\psi_1\rangle, \dots, |\psi_K\rangle\} \), along with complex numbers \( \lambda_1, \dots, \lambda_K \), such that 
 \( U = \lambda_1 |\psi_1\rangle \langle \psi_1| + \cdots + \lambda_K |\psi_K\rangle \langle \psi_K|.\)
 This matrix \( U \) can be diagonalized in an orthonormal basis consisting of its eigenvectors, with the corresponding eigenvalues on the diagonal.
 \end{mdframed}
-
 The main implementation of the phase estimation algorithm is shown below:
-
+\vspace{-0.1cm}
 \begin{mdframed}
-\textbf{Phase Estimation Algorithm:}
+\textbf{Quantum Phase Estimation Algorithm:}
 \begin{itemize}
 \item \textbf{Input:}
 An \( n \)-qubit quantum state \( |\psi\rangle \) and a unitary quantum circuit for an \( n \)-qubit operation \( U \).
@@ -71,9 +69,7 @@ An approximation to the number \( \theta \in [0,1) \) satisfying
 \(U |\psi\rangle = e^{2\pi i \theta} |\psi\rangle.\)
 \end{itemize}
 \end{mdframed}
-
-
-### \underline{Literature Review} {-} 
+## \underline{Bayesian QPE Literature Review} {-} 
 
 
 

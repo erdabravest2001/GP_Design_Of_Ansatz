@@ -79,7 +79,7 @@ Quantum phase estimation also takes a probablistic approach in the form of Bayes
 This method uses a quantum circuit to represent the posterior distribution of the phase estimation algorithm \cite{Weibe2016, Yamamoto2023}. For a two qubit circuit, the authors used a quantum circuit which is an acyclic network of quantum gates connected by wires. The quantum
 gates are matrices that represent quantum operations while the wires represent the \textbf{qubits} (see appendix) on which the gates act. The pictoral representation of the circuit is shown in Figure 1 (on the right). 
 
-
+Minim
 
 
 

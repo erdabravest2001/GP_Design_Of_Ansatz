@@ -70,6 +70,11 @@ An approximation to the number \( \theta \in [0,1) \) satisfying
 \end{itemize}
 \end{mdframed}
 ## \underline{Bayesian QPE Literature Review} {-} 
+Quantum phase estimation also takes a probablistic approach in the form of Bayesian optimization. Termed Bayesian Quantum Phase Estimation by Weibe and Granade in 2016 \cite{Wiebe2016}. It was made efficient in a highly noisy environment by Yamamoto et al. (2024) \cite{Yamamoto2023}. 
+This method uses a quantum circuit to represent the posterior distribution of the phase estimation algorithm \cite{Yamamoto2023}\cite{Wiebe2016}. For a two qubit circuit, the authors used a quantum circuit which is an acyclic network of quantum gates connected by wires. The quantum
+gates are matrices that represent quantum operations while the wires represent the \textbf{qubits} (see appendix) on which the gates act. The pictoral
+
+
 
 
 

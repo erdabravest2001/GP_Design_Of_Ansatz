@@ -1,5 +1,5 @@
 ---
-title: "Estimation of Ro-Vibrational Eigenphases Using Bayesian Quantum Phase Estimation"
+title: "Estimation of Ro-Vibrational Eigenphases Using Gaussian Processes and Bayesian Quantum Phase Estimation"
 subtitle: "STAT 447C Final Project: Ethan Rajkumar, #55024616"
 output: 
   pdf_document: 
@@ -29,6 +29,7 @@ header-includes:
   - \usepackage{hyperref}
   - \usepackage{fancyhdr}
   - \usepackage{tikz}
+  - \usepackage{wrapfig}
   - \usepackage{amsmath}
   - \usepackage{amssymb}
   - \usepackage{amsthm}
@@ -69,14 +70,21 @@ An approximation to the number \( \theta \in [0,1) \) satisfying
 \(U |\psi\rangle = e^{2\pi i \theta} |\psi\rangle.\)
 \end{itemize}
 \end{mdframed}
-## \underline{Bayesian QPE Literature Review} {-} 
-Quantum phase estimation also takes a probablistic approach in the form of Bayesian optimization. Termed Bayesian Quantum Phase Estimation by Weibe and Granade in 2016 \cite{Wiebe2016}. It was made efficient in a highly noisy environment by Yamamoto et al. (2024) \cite{Yamamoto2023}. 
-This method uses a quantum circuit to represent the posterior distribution of the phase estimation algorithm \cite{Yamamoto2023}\cite{Wiebe2016}. For a two qubit circuit, the authors used a quantum circuit which is an acyclic network of quantum gates connected by wires. The quantum
-gates are matrices that represent quantum operations while the wires represent the \textbf{qubits} (see appendix) on which the gates act. The pictoral
+## \underline{Bayesian QPE} {-} 
+\begin{wrapfigure}{r}{0.40\textwidth}
+\includegraphics[width=0.40\textwidth]{tex/circuit.png}
+\end{wrapfigure}
+
+Quantum phase estimation also takes a probablistic approach in the form of Bayesian optimization. Termed Bayesian Quantum Phase Estimation by Weibe and Granade in 2016 \cite{Weibe2016}. It was made efficient in a highly noisy environment by Yamamoto et al. (2024) \cite{Yamamoto2023}. 
+This method uses a quantum circuit to represent the posterior distribution of the phase estimation algorithm \cite{Weibe2016, Yamamoto2023}. For a two qubit circuit, the authors used a quantum circuit which is an acyclic network of quantum gates connected by wires. The quantum
+gates are matrices that represent quantum operations while the wires represent the \textbf{qubits} (see appendix) on which the gates act. The pictoral representation of the circuit is shown in Figure 1 (on the right). 
 
 
 
 
+
+
+## underline{Results} {-} 
 
 
 \bibliographystyle{achemso}

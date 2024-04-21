@@ -1,4 +1,7 @@
 import numpy as np
+hartree = 219474.64
+da_to_au = 1822.888486209
+au_to_angs = 0.529177249
 
 ### DATA FROM INTERPOTENTIAL CURVES ###
 cr2_pot_points = {
@@ -42,7 +45,6 @@ def pot_fun(r, lims, interp_f):
 
 def get_pot_cr2(s):
    from scipy.interpolate import interp1d
-
    rs = cr2_pot_points[s][0]
    lims = rs[0], rs[-1]
    ps = cr2_pot_points[s][1]

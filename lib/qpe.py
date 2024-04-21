@@ -1,7 +1,7 @@
 import pennylane as qml
 from pennylane import numpy as np
 
-class DVR_VQE:
+class QPE:
     def __init__(self, mol_params, pot_fun, log_dir=None) -> None:
         self.mol_params = mol_params
         self.log_dir = log_dir

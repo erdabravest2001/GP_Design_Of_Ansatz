@@ -1,6 +1,6 @@
-from dvr_vqe import DVR_VQE
+from lib.qpe import DVR_VQE
 import pennylane as qml
-from cr2_dataset import *
+from lib.cr2dataset import *
 
 def dvr_0inf(r, v, m=1, start_ind=0):
     import numpy as np

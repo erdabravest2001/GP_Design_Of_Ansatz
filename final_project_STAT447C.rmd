@@ -4,11 +4,13 @@ subtitle: "STAT 447C Final Project: Ethan Rajkumar, #55024616"
 output: 
   pdf_document: 
     latex_engine: xelatex
+    includes:
+      in_header: tex/preamble.tex
 geometry: 
-  - top=15mm
+  - top=5mm
   - bottom=20mm
-  - left=20mm
-  - right=20mm
+  - left=10mm
+  - right=10mm
 header-includes:
   - \usepackage{amsmath, amssymb, amsthm, tcolorbox}
   - \usepackage{geometry}
@@ -35,28 +37,34 @@ header-includes:
   - \usepackage{amsthm}
   - \usepackage{mdframed} % For creating the boxed environment
   - \newmdtheoremenv{definition}{Definition}
+  
 bibliography: tex/manuscript.bib
 ---
-\vspace{-1.8cm}
-## \underline{Ro-vibrational Eigenvlaue Problem Formulation} {-}
+\vspace{-1.5cm}
+\maketitle \begin{center}\githublogo\end{center}
+\vspace{-1.5cm}
+### \underline{Introduction}  {-}
+\vspace{-0.3cm}
 To analyze molecular characteristics, chemists often solve the following eigenvalue equation:
 \begin{align}
     \mathbf{H}_{RV} \Psi(\vec{\theta}) &= E_0 \Psi(\vec{\theta})
 \end{align}
 In this equation, $\mathbf{H}_{RV}$ represents the Hamiltonian that accounts for the molecule's total ro-vibrational energy. The wavefunction $\Psi$, parameterized by the vector $\vec{\theta}$, serves as the eigenvector. The energy level $E_0$ corresponds to the lowest ground state energy that electrons can occupy. While simpler molecules like H$_2$ allow for straightforward single vector decompositions, larger molecules present computational challenges due to the increased size of $\mathbf{H}_{RV}$. 
-Asnaashari et al.  employed a hybrid quantum-classical computing approach to address this eigenvalue problem, using a greedy induced point sampling algorithm to compute an expectation in their respective basis \cite{asnaashari2023compact}. However, they encountered significant scalability issues related to the time complexity of quantum circuit generation, denoted by $\mathcal{O}(\sum_k n \cdot M_k)$, where $M$ represents the time required to generate an expectation value per iteration over $n$ samples, and $k$ denotes the iteration index.
+Asnaashari et al.  employed a hybrid quantum-classical computing approach to address this eigenvalue problem, using a greedy induced point sampling algorithm to compute an expectation in their respective basis \cite{asnaashari2023compact}. Yanamato and Weibe attempted to use quantum phase estimation to compute the eigenphase/eigenvalues in the computational basis \cite{Yamamoto2023, Weibe2016}. However, they encountered significant scalability issues related to the time complexity of quantum circuit generation, denoted by $\mathcal{O}(\sum_k n \cdot M_k)$, where $M$ represents the time required to generate an expectation value per iteration over $n$ samples, and $k$ denotes the iteration index.
 To overcome this scaling issue, this work implements a phase estimation algorithm enhanced by Bayesian Optimization to solve the eignevalue problem instead. This method was evaluated on a dichromium gas (Cr$_2$) model, using data from a discrete variable representation of the Hamiltonian. 
-##  \underline{Background}  {-} \\
-Taking the ro-vibrational Hamiltonian $\mathbf{H}_{RV}$ and performing the following operation to form a matrix $\mathcal{U}$ gives \(\mathcal{U} = e^{i \mathbf{H}_{RV} t} \).
-The expression above allows for the application of the phase estimation algorithm, which estimates the eigenvalues of the unitary operators. The algorithm then uses these eigenvalues to approximate the eigenvalues of the original Hamiltonian. A matrix is denoted to be unitary if it follows the spectral theorem which is listed below.
+\vspace{-0.7cm}
+
+###  \underline{Literature Review}  {-} 
+\vspace{-0.3cm}
+Taking the ro-vibrational Hamiltonian $\mathbf{H}_{RV}$ and performing the following operation to form a matrix $\mathcal{U}$ gives \(\mathcal{U} = e^{i \mathbf{H}_{RV} t} \). The expression above allows for the application of the phase estimation algorithm, which estimates the eigenvalues of the unitary operators. The algorithm then uses these eigenvalues to approximate the eigenvalues of the original Hamiltonian. A matrix is denoted to be unitary if it follows the spectral theorem which is listed below.
 \begin{mdframed}
 \textbf{Spectral Theorem:}
 Let \( U \) be a normalized \( K \times K \) complex matrix. There exists an orthonormal basis of \( K \)-dimensional complex vectors \( \{|\psi_1\rangle, \dots, |\psi_K\rangle\} \), along with complex numbers \( \lambda_1, \dots, \lambda_K \), such that 
 \( U = \lambda_1 |\psi_1\rangle \langle \psi_1| + \cdots + \lambda_K |\psi_K\rangle \langle \psi_K|.\)
 This matrix \( U \) can be diagonalized in an orthonormal basis consisting of its eigenvectors, with the corresponding eigenvalues on the diagonal.
 \end{mdframed}
+\vspace{-0.3cm}
 The main implementation of the phase estimation algorithm is shown below:
-\vspace{-0.1cm}
 \begin{mdframed}
 \textbf{Quantum Phase Estimation Algorithm:}
 \begin{itemize}
@@ -69,30 +77,28 @@ An approximation to the number \( \theta \in [0,1) \) satisfying
 \(U |\psi\rangle = e^{2\pi i \theta} |\psi\rangle.\)
 \end{itemize}
 \end{mdframed}
-## \underline{Bayesian QPE} {-} 
+Quantum phase estimation can also take a probablistic approach in the form of Bayesian optimization. Termed Bayesian Quantum Phase Estimation by Weibe and Granade in 2016 \cite{Weibe2016}. It was made efficient in a highly noisy environment by Yamamoto et al. (2024) \cite{Yamamoto2023}. 
+This method uses a quantum circuit to represent the posterior distribution of the phase estimation algorithm \cite{Weibe2016, Yamamoto2023}. For a two qubit circuit, the authors used a quantum circuit which is an acyclic network of quantum gates connected by wires. The quantum
+gates are matrices that represent quantum operations while the wires represent the \textbf{qubits} (see appendix) on which the gates act. The pictoral representation of the circuit is shown in Figure 1 (below). 
 \begin{wrapfigure}{r}{0.40\textwidth}
 \includegraphics[width=0.40\textwidth]{tex/circuit.png}
 \end{wrapfigure}
-
-Quantum phase estimation also takes a probablistic approach in the form of Bayesian optimization. Termed Bayesian Quantum Phase Estimation by Weibe and Granade in 2016 \cite{Weibe2016}. It was made efficient in a highly noisy environment by Yamamoto et al. (2024) \cite{Yamamoto2023}. 
-This method uses a quantum circuit to represent the posterior distribution of the phase estimation algorithm \cite{Weibe2016, Yamamoto2023}. For a two qubit circuit, the authors used a quantum circuit which is an acyclic network of quantum gates connected by wires. The quantum
-gates are matrices that represent quantum operations while the wires represent the \textbf{qubits} (see appendix) on which the gates act. The pictoral representation of the circuit is shown in Figure 1 (on the right). 
-
 The quantum circuit is parameterized by \(k \in \mathbb{N}$ and \(\beta \in [0,1]\). The circuit is measured in the Pauli X basis and the measurement is denoted as a probability of states (or a likelihood) in the computational basis such that \(p(m\vert \phi, k, \beta) = \frac{1 + cos(k\phi + \beta)}{2}\)
-where m is the measurement outcome in the computational basis, $\phi$ is the unknown where \(p(\phi)\sim \text{Unif}[0, 2\pi)\)$, and RZ is a rotational matrice described in the appendix below. 
+where m is the measurement outcome in the computational basis, $\phi$ is the unknown where \(p(\phi)\sim \text{Unif}[0, 2\pi)\), and RZ is a rotational matrice described in the appendix below. 
+With R possible measurement outcomes and high number of iterations, a posterior distribution can be computed such that $p(\phi \vert m, k, \beta) \propto p(\phi) \cdot \Pi^R_{r=1}p(m_r | \phi, k+r, \beta_r)$. Once converged, the probabilities distributions are then used to compute a posterior mean with respect to a observable or \(\Sigma_R p(\phi \vert m, k, \beta) \langle  R | \hat{H} | R \rangle \). 
 
-With R possible measurement outcomes and high number of iterations, a posterior distribution can be computed such that $p(\phi \vert m, k, \beta) \propto p(\phi)$ $\Pi^R_{r=1}\cdot p(m_r \vert \phi, k+r, \beta_r)$. Once converged, the probabilities distributions are then used to compute a posterior mean with respect to a observable or \(\sigma p(\phi \vert m, k, \beta) \langle  R | \hat{H} | R \rangle \). 
-A common problem in current quantum computing algorithms is the number of  gates to be used in a circuit. A higher number of gates often results in State Preparation and Measurement (SPAM) Errors which can lead to inaccurate results. While the requirements of the Yamamoto et. al, 2024, scaled down to ensure 920 gates or less, this is still not enough to prevent errors in estimating molecular properties of molecules with elements beyond the first row of the periodic table.  
 
-Thus, the goal of this project is to implement a Bayesian Optimization Method to roughly estimate the eigenvector of a Hamiltonian while also minimizing the number of gates used in the quantum algorithm for a discrete variable representation of the Hamiltonian which already minimizes the number of qubits used. The algorithm will be tested on a dichromium gas (Cr$_2$) model. 
-
-## \underline{Data Preprocessing and Generation of Unitary Matrices} {-} 
-\begin{wrapfigure}{r}{0.35\textwidth}
-\includegraphics[width=0.35\textwidth]{tex/potential_energy_graph.png}
+### \underline{Problem Formulation}{-} 
+\vspace{-0.3cm}
+\begin{wrapfigure}{r}{0.40\textwidth}
+\includegraphics[width=0.40\textwidth]{tex/potential_energy_graph.png}
 \end{wrapfigure}
-The data used in this project was generated by Asnaashari and is a discrete variable representation of the Hamiltonian \cite{asnaashari2023compact}. First, an interpotential curve (measures the Coloumbic interaction of two atoms) was generated from Fortran for the Cr$_2$ molecule (Fig 2.). Then 
+A common problem in current quantum computing algorithms is the number of  gates to be used in a circuit. A higher number of gates often results in State Preparation and Measurement (SPAM) Errors which can lead to inaccurate results. While the requirements of the Yamamoto et. al, 2024, scaled down to ensure 920 gates or less, this is still not enough to prevent errors in estimating molecular properties of molecules with elements beyond the first row of the periodic table. Thus, the goal of this project is to implement a Bayesian Optimization Method to roughly estimate the eigenvector of a Hamiltonian while also minimizing the number of gates used in the quantum algorithm for a discrete variable representation of the Hamiltonian which already minimizes the number of qubits used. The algorithm will be tested on a dichromium gas (Cr$_2$) model. 
+\vspace{-0.7cm}
 
-
+### \underline{Data Preprocessing and Generation of Unitary Matrices} {-} 
+\vspace{-0.3cm}
+The data used in this project was generated by Asnaashari and is a discrete variable representation of the Hamiltonian \cite{asnaashari2023compact}. First, an interpotential curve (measures the Coloumbic interaction of two atoms) was generated from Fortran for the Cr$_2$ molecule (Fig 2.). 
 
 ## \underline{Results} {-} 
 

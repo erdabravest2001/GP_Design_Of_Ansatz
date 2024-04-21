@@ -67,8 +67,23 @@ def experiment_probs(k, beta, wires, unitary_matrices, estimation_wires, gate_in
     probs = circuit(k, beta)
     return probs
 
+def get_k_and_beta(n_samples, lambda_k=3.0, mu_beta=0.0, sigma_beta=1.0):
+    import numpy as np
+    ks = np.random.poisson(lam=lambda_k, size=n_samples)
+    betas = np.random.normal(loc=mu_beta, scale=sigma_beta, size=n_samples)
+    return ks, betas
+
+def init_fourier_series(N, J):
+    import numpy as np 
+    fourier_coefficients = {}
+    for i in range(N + 1):
+        R = 2 ** i
+        J_R = J 
+        coefficients = np.zeros((2, J_R + 1))
+        coefficients[0, 0] = 1 / (2 * np.pi)
+        fourier_coefficients[R] = coefficients
+    return fourier_coefficients
 
 
-    
-    
+
     

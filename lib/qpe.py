@@ -12,8 +12,8 @@ class QPE:
         return str(int(time.time()))
 
     def get_DVR_Rtheta(self, dvr_options):
-        from ham_gen_arhclmgnh import get_DVR_Rtheta
-        from ham_gen_cr2 import get_dvr_r
+        from .ham_gen_arhclmgnh import get_DVR_Rtheta
+        from .ham_gen_cr2 import get_dvr_r
         if dvr_options['type'] == 'jacobi':
             Rs_DVR, Xs_K = get_DVR_Rtheta(dvr_options)
             return Rs_DVR, Xs_K
@@ -23,10 +23,10 @@ class QPE:
 
     def get_h_dvr(self, dvr_options, J=0):
         if dvr_options['type'] == '1d':
-            from ham_gen_cr2 import get_ham_DVR
+            from .ham_gen_cr2 import get_ham_DVR
             return get_ham_DVR(self.pot, dvr_options, mol_params=self.mol_params)
         elif dvr_options['type'] == 'jacobi':
-            from ham_gen_arhclmgnh import get_ham_DVR
+            from .ham_gen_arhclmgnh import get_ham_DVR
             return get_ham_DVR(self.pot, dvr_options, mol_params=self.mol_params)
     
     def excited_cost_function(h_dvr_pauli, ansatz, opt_p_list, betas, vqe, p):

@@ -1,5 +1,5 @@
 ---
-title: "Estimation of Ro-Vibrational Eigenphases Using Hierarchal Model-Enhanced Quantum Phase Estimation"
+title: "Estimation of Ro-Vibrational Eigenphases Using Bayesian Quantum Phase Estimation"
 subtitle: "STAT 447C Final Project: Ethan Rajkumar, #55024616"
 output: 
   pdf_document: 

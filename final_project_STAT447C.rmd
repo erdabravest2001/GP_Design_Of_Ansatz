@@ -1,5 +1,5 @@
 ---
-title: "Estimation of Ro-Vibrational Eigenphases Using Bayesian Quantum Phase Estimation"
+title: "Estimation of Model Mispecification in Bayesian Quantum Phase Estimation"
 subtitle: "STAT 447C Final Project: Ethan Rajkumar, #55024616"
 output: 
   pdf_document: 
@@ -41,29 +41,30 @@ header-includes:
 bibliography: tex/manuscript.bib
 ---
 \vspace{-1.5cm}
-\maketitle \begin{center}\githublogo\end{center}
-\vspace{-1.5cm}
-### \underline{Introduction}  {-}
-\vspace{-0.3cm}
+\maketitle
+\begin{center}
+\githublogo
+\end{center}
+### \underline{Introduction} {-}
+\vspace{-0.5cm}
 To analyze molecular characteristics, chemists often solve the following eigenvalue equation:
 \begin{align}
-    \mathbf{H}_{RV} \Psi(\vec{\theta}) &= E_0 \Psi(\vec{\theta})
+    \mathbf{H}_{RV} \Psi(\vec{\theta}) &= E \Psi(\vec{\theta})
 \end{align}
-In this equation, $\mathbf{H}_{RV}$ represents the Hamiltonian that accounts for the molecule's total ro-vibrational energy. The wavefunction $\Psi$, parameterized by the vector $\vec{\theta}$, serves as the eigenvector. The energy level $E_0$ corresponds to the lowest ground state energy that electrons can occupy. While simpler molecules like H$_2$ allow for straightforward single vector decompositions, larger molecules present computational challenges due to the increased size of $\mathbf{H}_{RV}$. 
-Asnaashari et al.  employed a hybrid quantum-classical computing approach to address this eigenvalue problem, using a greedy induced point sampling algorithm to compute an expectation in their respective basis \cite{asnaashari2023compact}. Yanamato and Weibe attempted to use quantum phase estimation to compute the eigenphase/eigenvalues in the computational basis \cite{Yamamoto2023, Weibe2016}. However, they encountered significant scalability issues related to the time complexity of quantum circuit generation, denoted by $\mathcal{O}(\sum_k n \cdot M_k)$, where $M$ represents the time required to generate an expectation value per iteration over $n$ samples, and $k$ denotes the iteration index.
-To overcome this scaling issue, this work implements a phase estimation algorithm enhanced by Bayesian Optimization to solve the eignevalue problem instead. This method was evaluated on a dichromium gas (Cr$_2$) model, using data from a discrete variable representation of the Hamiltonian. 
-\vspace{-0.7cm}
+In this equation, \(\mathbf{H}_{RV}\)represents the Hamiltonian that accounts for the molecule's total ro-vibrational energy. The wavefunction \(\Psi\), parameterized by the vector \(\vec{\theta}\), serves as the eigenvector. The energy level \(E \) corresponds to the eigenvalue which represents the energy levels electrons can occupy. While simpler molecules like H\(_{2}\) allow for straightforward single vector decompositions, larger molecules present computational challenges due to the increased size of \( \mathbf{H}_{RV} \). This project aims to address these challenges by using quantum phase estimation to estimate a posterior distribution, which can then be used to estimate the eigenvalues of \(\mathbf{H}_{RV}\) for the Cr\(_2\) molecule.
+\vspace{-0.5cm}
 
-###  \underline{Literature Review}  {-} 
-\vspace{-0.3cm}
-Taking the ro-vibrational Hamiltonian $\mathbf{H}_{RV}$ and performing the following operation to form a matrix $\mathcal{U}$ gives \(\mathcal{U} = e^{i \mathbf{H}_{RV} t} \). The expression above allows for the application of the phase estimation algorithm, which estimates the eigenvalues of the unitary operators. The algorithm then uses these eigenvalues to approximate the eigenvalues of the original Hamiltonian. A matrix is denoted to be unitary if it follows the spectral theorem which is listed below.
+### \underline{Literature Review} {-}
+\vspace{-0.5cm}
+Taking the ro-vibrational Hamiltonian \(\mathbf{H}_{RV}\)  and performing the following operation to form a matrix \(\mathcal{U}\) gives \(\mathcal{U} = e^{i \mathbf{H}_{RV} t}\). The expression above allows for the application of the phase estimation algorithm, which estimates the eigenvalues of the unitary operators. The algorithm then uses these eigenvalues to approximate the eigenvalues of the original Hamiltonian. A matrix is denoted to be unitary if it follows the spectral theorem which is listed below.
+\vspace{-0.1cm}
 \begin{mdframed}
 \textbf{Spectral Theorem:}
 Let \( U \) be a normalized \( K \times K \) complex matrix. There exists an orthonormal basis of \( K \)-dimensional complex vectors \( \{|\psi_1\rangle, \dots, |\psi_K\rangle\} \), along with complex numbers \( \lambda_1, \dots, \lambda_K \), such that 
 \( U = \lambda_1 |\psi_1\rangle \langle \psi_1| + \cdots + \lambda_K |\psi_K\rangle \langle \psi_K|.\)
 This matrix \( U \) can be diagonalized in an orthonormal basis consisting of its eigenvectors, with the corresponding eigenvalues on the diagonal.
 \end{mdframed}
-\vspace{-0.3cm}
+\vspace{-0.1cm}
 The main implementation of the phase estimation algorithm is shown below:
 \begin{mdframed}
 \textbf{Quantum Phase Estimation Algorithm:}
@@ -77,82 +78,140 @@ An approximation to the number \( \theta \in [0,1) \) satisfying
 \(U |\psi\rangle = e^{2\pi i \theta} |\psi\rangle.\)
 \end{itemize}
 \end{mdframed}
-Quantum phase estimation can also take a probablistic approach in the form of Bayesian optimization. Termed Bayesian Quantum Phase Estimation by Weibe and Granade in 2016 \cite{Weibe2016}. It was made efficient in a highly noisy environment by Yamamoto et al. (2024) \cite{Yamamoto2023}. 
-This method uses a quantum circuit to represent the posterior distribution of the phase estimation algorithm \cite{Weibe2016, Yamamoto2023}. For a two qubit circuit, the authors used a quantum circuit which is an acyclic network of quantum gates connected by wires. The quantum
-gates are matrices that represent quantum operations while the wires represent the \textbf{qubits} (see appendix) on which the gates act. The pictoral representation of the circuit is shown in Figure 1 (below). 
+Quantum phase estimation can also take a probabilistic approach in the form of Bayesian optimization. Termed Bayesian Quantum Phase Estimation by Weibe and Granade in 2016 \cite{Weibe2016}. It was made efficient in a highly noisy environment by Yamamoto et al. (2024) \cite{Yamamoto2023}. 
+This method uses a quantum circuit to represent the posterior distribution of the phase estimation algorithm \cite{Weibe2016, Yamamoto2023}. For a two-qubit circuit, the authors used a quantum circuit which is an acyclic network of quantum gates connected by wires. The quantum gates are matrices that represent quantum operations while the wires represent the \textbf{qubits} (see appendix) on which the gates act. The pictorial representation of the circuit is shown in Figure 1 (below).
 \begin{wrapfigure}{r}{0.40\textwidth}
 \includegraphics[width=0.40\textwidth]{tex/circuit.png}
 \end{wrapfigure}
-The quantum circuit is parameterized by \(k \in \mathbb{N}$ and \(\beta \in [0,1]\). The circuit is measured in the Pauli X basis and the measurement is denoted as a probability of states (or a likelihood) in the computational basis such that \(p(m\vert \phi, k, \beta) = \frac{1 + cos(k\phi + \beta)}{2}\)
-where m is the measurement outcome in the computational basis, $\phi$ is the unknown where \(p(\phi)\sim \text{Unif}[0, 2\pi)\), and RZ is a rotational matrice described in the appendix below. 
-With R possible measurement outcomes and high number of iterations, a posterior distribution can be computed such that $p(\phi \vert m, k, \beta) \propto p(\phi) \cdot \Pi^R_{r=1}p(m_r | \phi, k+r, \beta_r)$. Once converged, the probabilities distributions are then used to compute a posterior mean with respect to a observable or \(\Sigma_R p(\phi \vert m, k, \beta) \langle  R | \hat{H} | R \rangle \). 
-
-
-### \underline{Problem Formulation}{-} 
-\vspace{-0.3cm}
-\begin{wrapfigure}{r}{0.40\textwidth}
-\includegraphics[width=0.40\textwidth]{tex/potential_energy_graph.png}
-\end{wrapfigure}
-A common problem in current quantum computing algorithms is the number of  gates to be used in a circuit. A higher number of gates often results in State Preparation and Measurement (SPAM) Errors which can lead to inaccurate results. While the requirements of the Yamamoto et. al, 2024, scaled down to ensure 920 gates or less, this is still not enough to prevent errors in estimating molecular properties of molecules with elements beyond the first row of the periodic table. Thus, the goal of this project is to implement a Bayesian Optimization Method to roughly estimate the eigenvector of a Hamiltonian while also minimizing the number of gates used in the quantum algorithm for a discrete variable representation of the Hamiltonian which already minimizes the number of qubits used. The algorithm will be tested on a dichromium gas (Cr$_2$) model. 
+The quantum circuit is parameterized by \(k \in \mathbb{N}\) and \(\beta \in [0 , 1]\). The circuit is measured in the Pauli X basis and the measurement is denoted as a probability of states (or a likelihood) in the computational basis such that \(p(m\vert \phi, k, \beta) = \frac{1 + \cos(k\phi + \beta)}{2}\) where \(m\) is the measurement outcome in the computational basis, \(\phi\) is the unknown where \(p(\phi)\sim \text{Unif}[0, 2\pi)\), and RZ is a rotational matrix described in the appendix below. 
+With \(R\) possible measurement outcomes and a high number of iterations, a posterior distribution can be computed such that \(p(\phi \vert m, k, \beta) \propto p(\phi) \cdot \Pi^R_{r=1}p_{r}(m\vert \phi, k, \beta)\). Once converged, the probability distributions are then used to compute a posterior mean with respect to an observable or \(\sum_R p(\phi \vert m, k, \beta) \langle  R | \hat{H} | R \rangle \). Note that this work does not compute a posterior mean but instead creates the probabilities that will estimate the eigenvalues of the Hamiltonian matrix.
 \vspace{-0.7cm}
 
+### \underline{Problem Formulation} {-} 
+\begin{wrapfigure}{r}{0.40\textwidth}
+\includegraphics[width=0.40\textwidth]{tex/potentialenergygraph.png}
+\end{wrapfigure}
+While Asnaashari et al.  employed a hybrid quantum-classical computing approach to address an eigenvalue problem, using a greedy induced point sampling algorithm to compute an expectation in their respective basis \cite{asnaashari2023compact}. However, they encountered significant scalability issues related to the time complexity of quantum circuit generation, denoted by \(\mathcal{O}(\sum_k n \times M_k )\), where \(M_k\) represents the time required to generate an expectation value per iteration over \(n\) samples, and \(k\) denotes the iteration index. 
+Yamamoto and Weibe attempted to use quantum phase estimation of an Ising Hamiltonian to compute the eigenphase/eigenvalues in the computational basis \cite{Yamamoto2023, Weibe2016}. However, their method only uses up to 2 qubits, required 920 gates and is not scalable to a higher amount of qubits. The key challenge that this project aims to address is to create an algorithm that has a minimum of 5 qubits while also having a lower gate count (12) while also being accurate. The project algorithm, which is based on the Bayesian Quantum Phase Estimation algorithm, will be used to estimate the eigenvalues of the Hamiltonian matrix for the dichromium molecule. Further literature review showed that while very few papers have been published on the topic, the Bayesian Quantum Phase Estimation algorithm has been used to estimate the eigenvalues of the Hamiltonian matrix for the Cr\(_2\) molecule.
+
+\vspace{-0.5cm}
+
 ### \underline{Data Preprocessing and Generation of Unitary Matrices} {-} 
-\vspace{-0.3cm}
-The data used in this project was generated by Asnaashari and is a discrete variable representation of the Hamiltonian \cite{asnaashari2023compact}. First, an interpotential curve (measures the Coloumbic interaction of two atoms) was generated from Fortran for the Cr$_2$ molecule (Fig 2.). 
+\vspace{-0.5cm}
+The data used in this project was generated by Asnaashari and is a discrete variable representation of the Hamiltonian \cite{asnaashari2023compact}. First, an interpotential curve (measures the Coulombic interaction of two atoms) was generated from Fortran for the Cr\(_2\) molecule (graph on the right). Afterwards, a Hamiltonian matrix was selected from the 32 points collected from the curve for each spin state. 
+A combination of the \texttt{pennylane} and \texttt{phayes} Python 3.11.7 libraries were used to transform the Hamiltonian matrix into a unitary matrix as described in the literature review. The unitary matrix was then used to generate the quantum circuit by applying a transform: 
+\begin{align}
+    U = e^{i \mathbf{H}_{RV} t} 
+\end{align}
+The quantum circuit was then used to estimate the phases, \(\phi\), of each unitary matrix. The phase estimation algorithm itself can be described by the probabilistic model below. 
+\vspace{-0.5cm}
 
-## \underline{Results} {-} 
+## \underline{Model} {-}
+\vspace{-0.5cm}
+The model used in this project is a Bayesian model that estimates the phases of the unitary matrices. The model is parameterized by the number of qubits, \(n\), and the number of iterations, \(R\). 
+The model is defined as follows (using the $\sim$ notation): 
+\vspace{-0.2cm}
+\begin{align*}
+   \mathcal{L} &= (m | \phi,  \beta, k)  \sim \text{Fourier Distribution{\beta}} \\
+   \phi &\sim \text{Unif}(0, 2\pi) \\
+   \beta &\sim \text{Unif}(0, 2\pi) \\ 
+    k &\sim \mathcal{N}(\alpha, \sqrt{1/\sigma^2}) \\  
+    \alpha &\sim \text{Unif}[J, J_{max}] \text{ where \(J\) and \(J_{max}\)} \in \mathbb{N}
+\end{align*}
+
+\vspace{-0.2cm}
+
+The quantum circuit provided in the literature review is used to estimate the phases of the unitary matrices. Note that we are trying to estimate $\phi$ and the error compared to the true value, \(\phi_{0}\) which is the angle(s) or phase that we are trying to estimate. The error is denoted as $\epsilon = \phi - \phi_0$. The error is then used to estimate the eigenvalues of the Hamiltonian matrix. Note that the phases will be estimated for multiple spin states of dichromium gas. 
+The likelihood and prior are defined below: 
+
+\vspace{-0.2cm}
+
+\begin{mdframed}
+\begin{itemize} 
+\item \textbf{Likelihood}: This is defined by the quantum circuit as given by the first figure above. It is parameterized with \(k \in \mathbb{N}\) and \(\beta \in [0, 2\pi)\).  
+\begin{align*}
+    \mathbb{P}(m \vert \phi, k, \beta) &= \frac{1 + \cos(k\phi + \beta)}{2}  \text{decomposition into the product form gives,}\\ 
+    \mathbb{P}(m \vert \phi, k, \beta) &= \Pi^R_{r=1} p(m_r \vert | \phi, k, \beta)
+\end{align*}
+\item \textbf{Prior} This is the probability of phi or equivalently $\mathbb{\phi}$ 
+\begin{align*}
+    \mathbb{P}(\phi) &\sim \text{Unif}[0, 2\pi)
+\end{align*}
+\end{itemize}
+\end{mdframed}
+
+\vspace{-0.2cm} 
+Thus the posterior that is being is estimated is described by: 
+\vspace{-0.2cm} 
+\begin{align*}
+     \mathbb{P}(\phi \vert m, k, \beta) \propto \mathbb{P}(\phi) \cdot \Pi^R_{r=1} \mathbb{P}(m_r \vert \phi, k, \beta)
+\end{align*}
+\vspace{-0.1cm} 
+The evaluation metric used for this model is \(\epsilon =  \vert \phi - \phi_{0} \vert\). This particular error metric is used as the model and the true phases are evaluated in the same basis for each spin state. 
 
 
-
-
+## \underline{Results} {-}
 
 
 \bibliographystyle{achemso}
 \bibliography{tex/manuscript.bib}
 
-
 ## \underline{Appendix} {-} 
+
 ### \underline{A: Glossary of Some Quantum Computing Terms}  {-}
+
 #### \underline{Bra} {-}
+
 A row vector defined by: 
 
 \begin{align}
-   \langle  \psi \vert = \big [ \psi^\dagger_1, \psi^\dagger_2, ... , \psi^\dagger_K \big]
+   \langle  \psi \vert = \big [ \psi^\dagger_{1}, \psi^\dagger_{2}, ... , \psi^\dagger_{K} \big]
 \end{align}
 
-where $\psi^\dagger$ is the complex conjugate of $\psi$. 
+where \(\psi^\dagger\) is the complex conjugate of \(\psi\). 
 
 #### \underline{Ket} {-}
+
 A column vector defined by: 
 \begin{align*}
-    \vert \psi \rangle  = \big [ \psi_1, \psi_2, ... , \psi_K \big]^T
+    \vert \psi \rangle  = \big [ \psi_{1}, \psi_{2}, ... , \psi_K \big]^T
 \end{align*}
 
-
 #### \underline{Qubit} {-}
+
 Represented by a complex-valued, \(2 \times 1\) vector. It can be written as a linear combination of \(\ket{0}\) and \(\ket{1}\) as follows:
 \[
 \ket{\psi} = \alpha\ket{0} + \beta\ket{1}
 \] where \(\alpha\) and \(\beta\) are complex numbers, and \(|\alpha|^2 + |\beta|^2 = 1\). 
-Note that \begin{align}
-    \vert 0 \rangle  &=  [1 , 0]^T ,  \vert 1 \rangle = [0, 1]^T \end{align}
-
-One does not observe $\alpha$ and $\beta$. Instead $|\alpha|^2$ and $|\beta|^2$  are the coefficients that we observe. Each of  $|\alpha|^2$ and $|\beta|^2$  and beta correspond to the probability of collapsing to a specific state. 
-
-
-#### \underline{Computational Basis States} {-}
-Refers to the standard orthonormal basis for the state space of \(n\) qubits and represents a complete set of orthonormal vectors for this space. For a single qubit, the computational basis consists of the two states \(\ket{0}\) and \(\ket{1}\). Each computational basis state for a system of \(n\) qubits can be described as a tensor product of \(n\) single-qubit states, where each qubit is independently in either \(\ket{0}\) or \(\ket{1}\). The computational basis states form an orthonormal basis, which implies that they are mutually orthogonal and each has unit norm. The completeness of this basis set means that any state \(\ket{\psi}\) of the system can be uniquely expressed as a linear combination of these basis states, and no other states need to be added to fully describe the state space. Each basis state corresponds to a unique binary string of length \(n\), which is particularly useful for encoding and manipulating information in quantum computation. The general form of a computational basis state for an \(n\)-qubit system is:
-\[
-\ket{i_1 i_2 \dots i_n} = \ket{i_1} \otimes \ket{i_2} \otimes \cdots \otimes \ket{i_n}
-\]
-where \(i_k\) is either 0 or 1, representing the state of the \(k\)-th qubit. For example, in a two-qubit system, the computational basis states are \(\ket{00}\), \(\ket{01}\), \(\ket{10}\), and \(\ket{11}\), corresponding to the vector representations \([1, 0, 0, 0]^T\), \([0, 1, 0, 0]^T\), \([0, 0, 1, 0]^T\), and \([0, 0, 0, 1]^T\) respectively. Note that \(\ket{00} = \ket{1}\) , \(\ket{01}= \ket{2}\), \(\ket{10}= \ket{3}\), and \(\ket{11}=\ket{4}\). This is because the number of computational basis states $(k)$ is proportional to the number of qubits $(N)$ s.t. 
-
+Note that 
 \begin{align}
-    k = 2^N  
+    \vert 0 \rangle  &=  [1 , 0]^T ,  \vert 1 \rangle = [0, 1]^T 
 \end{align}
 
+One does not observe \(\alpha\) and \(\beta\). Instead \(|\alpha|^2\) and \(|\beta|^2\) are the coefficients that we observe. Each of  \(|\alpha|^2\) and \(|\beta|^2\)  and beta correspond to the probability of collapsing to a specific state. 
+
+#### \underline{Computational Basis States} {-}
+
+Refers to the standard orthonormal basis for the state space of \(n\) qubits and represents a complete set of orthonormal vectors for this space. For a single qubit, the computational basis consists of the two states \(\ket{0}\) and \(\ket{1}\). Each computational basis state for a system of \(n\) qubits can be described as a tensor product of \(n\) single-qubit states, where each qubit is independently in either \(\ket{0}\) or \(\ket{1}\). The computational basis states form an orthonormal basis, which implies that they are mutually orthogonal and each has unit norm. The completeness of this basis set means that any state \(\ket{\psi}\) of the system can be uniquely expressed as a linear combination of these basis states, and no other states need to be added to fully describe the state space. Each basis state corresponds to a unique binary string of length \(n\), which is particularly useful for encoding and manipulating information in quantum computation. The general form of a computational basis state for an \(n\)-qubit system is:
+
+\[
+\ket{i_{1} i_{2} \dots i_{n}} = \ket{i_{1}} \otimes \ket{i_{2}} \otimes \cdots \otimes \ket{i_{n}}
+\]
+
+where \(i_k\) is either 0 or 1, representing the state of the \(k\)-th qubit. For example, in a two-qubit system, the computational basis states are \(\ket{00}\), \(\ket{01}\), \(\ket{10}\), and \(\ket{11}\), corresponding to the vector representations \([1, 0, 0, 0]^T\), \([0, 1, 0, 0]^T\), \([0, 0, 1, 0]^T\), and \([0, 0, 0, 1]^T\) respectively. Note that \(\ket{00} = \ket{1}\) , \(\ket{01}= \ket{2}\), \(\ket{10}= \ket{3}\), and \(\ket{11}=\ket{4}\). This is because the number of computational basis states \((k)\) is proportional to the number of qubits \((N)\) such that 
+
+\begin{align}
+k = 2^N  
+\end{align}
+
+#### \underline{Hardware Basis States} {-}
+
+Refers to the set of gates or operations that a quantum computer can physically rea
+
 ### \underline{B: List of Quantum Gates Used in this Work} {-}
+
 #### \underline{Pauli-Z Gate (\(Z\))} {-} 
+
   \[
   Z = \begin{bmatrix}
   1 & 0 \\
@@ -169,3 +228,5 @@ where \(i_k\) is either 0 or 1, representing the state of the \(k\)-th qubit. Fo
   0 & e^{i\theta \cdot x_k} 
   \end{bmatrix}
   \]
+
+### \underline{C: Python Implementation} {-}

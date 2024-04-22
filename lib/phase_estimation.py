@@ -1,35 +1,26 @@
 
 import pennylane as qml
+import jax.numpy as jnp
+from jax import random
+import phayes.adaptive
 
 def create_hamiltonians(list_of_spins, list_of_params, mol_params):
     from lib.qpe import QPE
     from lib.cr2dataset import get_pot_cr2, hartree
-     # Dictionary to store the Hamiltonians for each spin and parameter set
     hamiltonians = {}
-
     for spin, params in zip(list_of_spins, list_of_params):
-        # Copy molecular parameters and update the name
         mol_params = mol_params.copy()
         mol_params['name'] += f'_{spin}'
-        
-        # Set DVR options based on the current parameter set
         dvr_options = {
             'type': '1d',
             'box_lims': (params[0], params[1]),
             'dx': (params[1] - params[0]) / 32,
             'count': 32
         }
-        
-        # Obtain the potential for the molecule at the given spin
         pot, lims = get_pot_cr2(spin)
-        
-        # Create the QPE object and obtain the Hamiltonian
         qpe = QPE(mol_params, pot)
         h_dvr = qpe.get_h_dvr(dvr_options, J=0) * hartree  
-        
-        # Store the Hamiltonian in the dictionary
         hamiltonians[(spin, tuple(params))] = h_dvr
-
     return hamiltonians
     
 def convert_to_unitary(matrix, n, wire_order, time=1.0):
@@ -40,50 +31,92 @@ def convert_to_unitary(matrix, n, wire_order, time=1.0):
 def find_true_phases(U):
     import numpy as np
     eigvals, _ = np.linalg.eig(U)
-    true_phases = np.angle(eigvals)
-    true_phases = np.mod(true_phases, 2*np.pi)
+    phases = np.log(eigvals)/(2 * np.pi * 1j)
+    true_phases = phases.real  
     return true_phases
 
-def init_custom_gates(unitary_matrices):
-    custom_gates = {}
-    for index, unitary_matrix in enumerate(unitary_matrices, start=1):
-        gate_name = f"uffsg{index}"
-        custom_gates[gate_name] = qml.QubitUnitary(unitary_matrix, wires=[0, 1, 2, 3, 4])
-    return custom_gates
+def Rz(beta):
+    return jnp.array([[jnp.exp(-1j * beta / 2), 0], [0, jnp.exp(1j * beta / 2)]])
 
-def experiment_probs(k, beta, wires, unitary_matrices, estimation_wires, gate_index):
-    import pennylane as qml
-    from pennylane import numpy as np
-    dev = qml.device('default.qubit', wires=wires)
-    custom_gates = init_custom_gates(unitary_matrices)
-    @qml.qnode(dev)
-    def circuit(k, beta):
-        qml.broadcast(qml.Hadamard, wires=range(wires), pattern="single")
-        qml.RZ(beta, wires=0)  
-        selected_gate = custom_gates[f"uffsg{gate_index}"]
-        qml.ctrl(selected_gate, control=estimation_wires)
-        qml.broadcast(qml.Hadamard, wires=range(wires), pattern="single")
-        return qml.probs(wires=estimation_wires)
-    probs = circuit(k, beta)
-    return probs
+def matrix_power(U, k):
+    result = U
+    for _ in range(1, k):
+        result = jnp.dot(result, U)
+    return result
 
-def get_k_and_beta(n_samples, lambda_k=3.0, mu_beta=0.0, sigma_beta=1.0):
+def initial_fourier_state(J):
+    from phayes import PhayesState 
+    import jax.random as random
+    import jax.numpy as jnp
     import numpy as np
-    ks = np.random.poisson(lam=lambda_k, size=n_samples)
-    betas = np.random.normal(loc=mu_beta, scale=sigma_beta, size=n_samples)
-    return ks, betas
-
-def init_fourier_series(N, J):
-    import numpy as np 
-    fourier_coefficients = {}
-    for i in range(N + 1):
-        R = 2 ** i
-        J_R = J 
-        coefficients = np.zeros((2, J_R + 1))
-        coefficients[0, 0] = 1 / (2 * np.pi)
-        fourier_coefficients[R] = coefficients
-    return fourier_coefficients
-
-
+    shape= (2, J)
+    seed = np.random.randint(0, 2**32 - 1)
+    random_key = random.split(random.key(seed))[0]
+    return PhayesState(fourier_mode=True, 
+                       fourier_coefficients=random.uniform(random_key, shape=shape, minval=0, maxval=2*jnp.pi), 
+                       von_mises_parameters=(0.0, 0.0),
+                       )
+    
 
     
+    
+
+def experiment_probs(k, beta, U, phi_vec, n_qubits_U):
+    dim = 2 ** n_qubits_U
+    full_dim = 2 * dim
+    H = jnp.array([[1, 1], [1, -1]]) / jnp.sqrt(2)
+    big_H = jnp.eye(1)
+    for _ in range(n_qubits_U + 1):
+        big_H = jnp.kron(big_H, H)
+
+    big_Rz = jnp.kron(Rz(beta), jnp.eye(full_dim // 2))
+
+    U_k = matrix_power(U, k)
+    controlled_U_k = jnp.block([
+        [jnp.eye(full_dim // 2), jnp.zeros((full_dim // 2, full_dim // 2))],
+        [jnp.zeros((full_dim // 2, full_dim // 2)), U_k]
+    ])
+    in_statevector = jnp.kron(jnp.array([1, 0]), phi_vec)
+    out_statevector = big_H @ controlled_U_k @ big_Rz @ big_H @ in_statevector
+    measurement_probs = jnp.abs(out_statevector) ** 2
+    normalized_probs = measurement_probs / jnp.sum(measurement_probs)
+    return normalized_probs
+
+def run_experiment(k: int, beta: float, U, phi_vec, n_qubits_U, n_shots: int):
+    import numpy as np
+    seed = np.random.randint(0, 2**32 - 1)
+    random_key = random.split(random.key(seed))[0]
+    probs = experiment_probs(k, beta, U, phi_vec, n_qubits_U)
+    return random.choice(random_key, a=jnp.arange(len(probs)), p=probs, shape=(len(probs),))
+
+
+def phase_estimation_iteration(prior, k, U, phi_vec, n_qubits_U, n_shots: int) -> jnp.ndarray:
+    from jax import jit
+    import phayes
+    import numpy as np
+    k, beta = jit(phayes.get_k_and_beta)(state=prior, error_rate=0.0, k_max=k)
+    likelihood = run_experiment(k, beta, U, phi_vec, n_qubits_U, n_shots)
+    m = [5, 6, 7, 8, 9, 10]
+    posterior_state = prior[0]*likelihood/np.sum(prior[0]*likelihood)
+    return beta, k, posterior_state
+
+def compute_state_probabilities(fourier_coefficients):
+    import jax.numpy as jnp
+    from jax.numpy.fft import ifft
+    state_vector = ifft(fourier_coefficients)
+    probabilities = jnp.abs(state_vector)**2
+    normalized_probabilities = probabilities / jnp.sum(probabilities)
+    return normalized_probabilities
+
+def compute_posterior_mean(probabilities):
+    state_indices = jnp.arange(len(probabilities))  
+    posterior_mean = jnp.sum(state_indices * probabilities)
+    return posterior_mean
+
+
+def estimate_phase_from_probabilities(probabilities, n_qubits):
+    indices = jnp.arange(2**n_qubits)
+    phase_index = jnp.sum(indices * probabilities)
+    phase = phase_index / (2**n_qubits)
+    return phase
+

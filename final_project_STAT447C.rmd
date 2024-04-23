@@ -276,6 +276,6 @@ Refers to the set of gates or operations that a quantum computer can physically 
   \]
 
 
-\includepages[pages=-]{tex/appendix_c.pdf}
+\includepdf[pages=-]{tex/appendix_c.pdf}
 
 

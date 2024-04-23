@@ -271,5 +271,8 @@ Refers to the set of gates or operations that a quantum computer can physically 
   \end{bmatrix}
   \]
 
+\includepages[pages=-]{tex/appendix_c.pdf}
+
+
 ## Acknowledgements {-}
 I would like to thank Professor Roman Krems and Kasra Asnaashari for the data used, their guidance and support throughout this project. I would also like to thank the University of British Columbia for providing the resources necessary to complete this project.

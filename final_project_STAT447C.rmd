@@ -1,5 +1,5 @@
 ---
-title: "Estimation of Model Mispecification in Bayesian Quantum Phase Estimation"
+title: "Estimation of Ro-Vibrational Eigenphases Using Bayesian Quantum Phase Estimation"
 subtitle: "STAT 447C Final Project: Ethan Rajkumar, #55024616"
 output: 
   pdf_document: 
@@ -37,7 +37,7 @@ header-includes:
   - \usepackage{amsthm}
   - \usepackage{mdframed} % For creating the boxed environment
   - \newmdtheoremenv{definition}{Definition}
-  
+  - \usepackage{pdfpages}
 bibliography: tex/manuscript.bib
 ---
 \vspace{-1.5cm}
@@ -91,8 +91,8 @@ With \(R\) possible measurement outcomes and a high number of iterations, a post
 \begin{wrapfigure}{r}{0.40\textwidth}
 \includegraphics[width=0.40\textwidth]{tex/potentialenergygraph.png}
 \end{wrapfigure}
-While Asnaashari et al.  employed a hybrid quantum-classical computing approach to address an eigenvalue problem, using a greedy induced point sampling algorithm to compute an expectation in their respective basis \cite{asnaashari2023compact}. However, they encountered significant scalability issues related to the time complexity of quantum circuit generation, denoted by \(\mathcal{O}(\sum_k n \times M_k )\), where \(M_k\) represents the time required to generate an expectation value per iteration over \(n\) samples, and \(k\) denotes the iteration index. 
-Yamamoto and Weibe attempted to use quantum phase estimation of an Ising Hamiltonian to compute the eigenphase/eigenvalues in the computational basis \cite{Yamamoto2023, Weibe2016}. However, their method only uses up to 2 qubits, required 920 gates and is not scalable to a higher amount of qubits. The key challenge that this project aims to address is to create an algorithm that has a minimum of 5 qubits while also having a lower gate count (12) while also being accurate. The project algorithm, which is based on the Bayesian Quantum Phase Estimation algorithm, will be used to estimate the eigenvalues of the Hamiltonian matrix for the dichromium molecule. Further literature review showed that while very few papers have been published on the topic, the Bayesian Quantum Phase Estimation algorithm has been used to estimate the eigenvalues of the Hamiltonian matrix for the Cr\(_2\) molecule.
+While Asnaashari et al.  employed a hybrid quantum-classical computing approach to address an eigenvalue problem, using a greedy induced point sampling algorithm to compute an expectation in their respective basis, they encountered significant scalability issues related to the time complexity of quantum circuit generation, denoted by \(\mathcal{O}(\sum_k n \times M_k )\), where \(M_k\) represents the time required to generate an expectation value per iteration over \(n\) samples, and \(k\) denotes the iteration index \cite{asnaashari2023compact}. 
+Yamamoto and Weibe attempted to use quantum phase estimation of a different type of Hamiltonian to compute the eigenphase/eigenvalues in the computational basis \cite{Yamamoto2023, Weibe2016}. However, their method only uses up to 2 qubits, required 920 gates and is not scalable to a higher amount of qubits. The key challenge that this project aims to address is to create an algorithm that has a minimum of 5 qubits while also having a lower gate count (12) while also being accurate. The project algorithm, which is based on the Bayesian Quantum Phase Estimation algorithm, will be used to estimate the eigenvalues of the Hamiltonian matrix for the dichromium molecule. Further literature review showed that very few papers have been published on the topic and that the Bayesian Quantum Phase Estimation algorithm has not been used to estimate the eigenvalues of the Hamiltonian matrix for the Cr\(_2\) molecule.
 
 \vspace{-0.5cm}
 
@@ -120,7 +120,6 @@ The model is defined as follows (using the $\sim$ notation):
 \end{align*}
 
 \vspace{-0.2cm}
-
 The quantum circuit provided in the literature review is used to estimate the phases of the unitary matrices. Note that we are trying to estimate $\phi$ and the error compared to the true value, \(\phi_{0}\) which is the angle(s) or phase that we are trying to estimate. The error is denoted as $\epsilon = \phi - \phi_0$. The error is then used to estimate the eigenvalues of the Hamiltonian matrix. Note that the phases will be estimated for multiple spin states of dichromium gas. 
 The likelihood and prior are defined below: 
 
@@ -130,8 +129,8 @@ The likelihood and prior are defined below:
 \begin{itemize} 
 \item \textbf{Likelihood}: This is defined by the quantum circuit as given by the first figure above. It is parameterized with \(k \in \mathbb{N}\) and \(\beta \in [0, 2\pi)\).  
 \begin{align*}
-    \mathbb{P}(m \vert \phi, k, \beta) &= \frac{1 + \cos(k\phi + \beta)}{2}  \text{decomposition into the product form gives,}\\ 
-    \mathbb{P}(m \vert \phi, k, \beta) &= \Pi^R_{r=1} p(m_r \vert | \phi, k, \beta)
+    \mathbb{P}(m \vert \phi, k, \beta) &= \frac{1 + \cos(k\phi + \beta)}{2}  \text{ decomposition into the product form gives,}\\ 
+    \mathbb{P}(m \vert \phi, k, \beta) &= \Pi^R_{r=1} p(m_r \vert \phi, k, \beta)
 \end{align*}
 \item \textbf{Prior} This is the probability of phi or equivalently $\mathbb{\phi}$ 
 \begin{align*}
@@ -147,14 +146,58 @@ Thus the posterior that is being is estimated is described by:
      \mathbb{P}(\phi \vert m, k, \beta) \propto \mathbb{P}(\phi) \cdot \Pi^R_{r=1} \mathbb{P}(m_r \vert \phi, k, \beta)
 \end{align*}
 \vspace{-0.1cm} 
-The evaluation metric used for this model is \(\epsilon =  \vert \phi - \phi_{0} \vert\). This particular error metric is used as the model and the true phases are evaluated in the same basis for each spin state. 
-
+The posterior is then used to estimate the angle or phase of the unitary matrix by computation of a posterior mean for the phase. The evaluation metric used for this model is \(\epsilon =  \vert \phi - \phi_{0} \vert\). This particular error metric is used as the model and the true phases are evaluated in the same basis for each spin state. 
 
 ## \underline{Results} {-}
+
+The graph below shows the \(\epsilon\) values for each of the unitary matrices for all of the spin states. The errors was obtained by taking the synthetic unitary data (100 experiments) and subtracting the true value (for each eigenvalue) from the result. Afterwards, each result was graphed on a cubic spline with an offset of 0.04 radians. This is so the results for all of the spin states can be easily visualized. 
+
+\begin{figure}[H]
+\centering
+\caption{Phase Error For Each Spin State (with respect to the Index of the Eigenphase)}
+\includegraphics[width=0.6\textwidth]{tex/2D_graph.png}
+\end{figure}
+
+The graph indicates that error rates are somewhat low for the 2D graph. The error manifests a sinusoidal pattern with respect to the eigenphase index, which is not uniform across the various spin states. Specifically, the error for the initial spin state (\({}^1\Sigma_{g}^+\)) averages significantly lower in comparison to that of the subsequent spin states. There is a notable increase in error when progressing from the first to the second spin state. The seventh and thirteenth spin states exhibit the most pronounced errors, which coincide with the greatest fluctuations in the variable \(\epsilon\).
+To determine the extent to which k and \(\beta\) values affect the error, 3D graphs were created to show the relationship between the error and the k and \(\beta\) values.
+
+\begin{figure}[H]
+\centering
+\caption{Phase Error For Each Spin State}
+\includegraphics[width=0.6\textwidth]{tex/3D_graph.png}
+\end{figure}
+
+The 3D plots show a pronounced clustering of data points within specific areas for all states, indicative of a localized aggregation of eigenvalues and possibly contributing to the consistently lower and more predictable error rates for this state. The compactness of these clusters suggests stability in the eigenvalues relative to changes in the parameters \(k\) and \(\beta\). Conversely, the \( 7^1\Sigma_u^+ \) and \( 13^1\Sigma_g^+ \) states demonstrate a wider spread of data points across the 3D space. This greater spread could be symptomatic of higher and more variable error rates, hinting at less stability or precision in these states. The scattered distribution points to a more pronounced variation in eigenvalues in response to \(k\) and \(\beta\). Additionally, the significant overlap of data at elevated \(k\) and \(\beta\) values suggests a closeness or even degeneracy in the eigenvalues, further compounding the variability of errors observed. 
+However the graph above suggests that model misspecification is highly unlikely as the error rates are relatively low and the model is robust to the assumptions it holds. The error with respect to the hyperparameters \(k\) and \(\beta\) (for all eigenvalues) occupys a approximately normal distribution indicating that it can be improved by adding a constant to the phase estimation. 
+
+Finally, a posterior distribution was obtained to determine the distributions of the phases given the hyperparameters, \(k\) and \(\beta\). 
+
+\begin{figure}[H]
+\centering
+\caption{Posterior Distribution For Each Spin State}
+\includegraphics[width=0.6\textwidth]{tex/posteriorgraph.png}
+\end{figure}
+
+The posterior can be described as an approximately slanted round sheet clustered.The tight clustering of points within the graph suggests a higher certainty about the phase \( \phi \) for the corresponding eigenvalue index, whereas a wider spread of points is indicative of greater uncertainty. When correlated with the results from the 3D phase error graph, it is suggested that lower \( k \) values and lower \(\beta\)  are associated with higher conditional probabilities of a phase and a greater phase error when compared to the true phase value. A sensitivity analysis could not be performed as the true distribution of the phases is unknown. 
+
+
+## \underline{Discussion of the Limitations} {-}
+The results of this study demonstrate that the extrapolation behavior of the model is proficient at determining the phases for a dichromium molecule, with a low error rate observed. The posterior distribution tends to follow a normal distribution across all eigenvalues and eigenvectors, in relation to the hyperparameters \( k \) and \( \beta \). Consequently, these phases can be transformed to estimate the eigenvalues of the Hamiltonian, which in turn correspond to the discrete energy levels accessible to electrons.
+
+However, the model is subject to certain limitations. Its stochastic nature, particularly when it is assumed to be time-independent, introduces variability that can lead to different simulation outcomes despite identical initial conditions, complicating the reproducibility of results and precise behavior prediction. Additionally, as the size of the molecule increases, the assumptions integral to the stochastic model may not remain valid across all scenarios. The inherent randomness of \(k\) and \(\beta\) may not accurately reflect the molecule's actual physical attributes, leading to possible model misspecification. Computational issues, such as underflow, present further challenges; as the molecular size escalates, the number of computational basis states expands exponentially. This is predicated on the assumption that the molecule may only uniformly occupy each state, which could amplify the model's sensitivity to initial conditions. Lastly, inherent to the definition of stochastic models is the potential oversight of quantum entanglement (the superposition of states)—an essential aspect of quantum mechanics that, if not accurately represented, could induce significant errors in the modeling of the posterior of \( \phi \) \cite{Yamamoto2023}.
+
+## \underline{Conclusion and Future Directions} {-}
+
+Despite these limitations, the model does offer a flexible and interpretable approach to Quantum Phase Estimation. By showing a high degree of accuracy for $\phi$, the model can be used to estimate the eigenvalues of the Hamiltonian matrix for the Cr\(_2\) molecule. Future work could focus on improving the model's scalability and robustness to larger molecules such as ArHCl. This could involve the development of a more efficient quantum circuit that can handle a higher number of qubits, as well as the implementation of a more sophisticated Bayesian optimization algorithm to improve the model's accuracy and precision. 
+Additionally, the model could be extended to include more complex quantum operations and gates, enhancing its capabilities and applicability to a wider range of molecular systems. Finally the model could be used in other applications than chemistry such as electronics engineering (phases for batteries).
+
+
+By addressing these challenges and limitations, the model could become a valuable tool for chemists, physicists and engineering seeking to analyze the ro-vibrational properties of complex molecules and materials.
 
 
 \bibliographystyle{achemso}
 \bibliography{tex/manuscript.bib}
+
 
 ## \underline{Appendix} {-} 
 
@@ -206,7 +249,7 @@ k = 2^N
 
 #### \underline{Hardware Basis States} {-}
 
-Refers to the set of gates or operations that a quantum computer can physically rea
+Refers to the set of gates or operations that a quantum computer can physically interpret and execute. The hardware basis 
 
 ### \underline{B: List of Quantum Gates Used in this Work} {-}
 
@@ -219,7 +262,6 @@ Refers to the set of gates or operations that a quantum computer can physically 
   \end{bmatrix}
   \]
 
-
 #### \underline{RZ Gate} {-} 
 
   \[
@@ -229,4 +271,5 @@ Refers to the set of gates or operations that a quantum computer can physically 
   \end{bmatrix}
   \]
 
-### \underline{C: Python Implementation} {-}
+## Acknowledgements {-}
+I would like to thank Professor Roman Krems and Kasra Asnaashari for the data used, their guidance and support throughout this project. I would also like to thank the University of British Columbia for providing the resources necessary to complete this project.

@@ -181,7 +181,7 @@ Finally, a posterior distribution was obtained to determine the distributions of
 The posterior can be described as an approximately slanted round sheet clustered.The tight clustering of points within the graph suggests a higher certainty about the phase \( \phi \) for the corresponding eigenvalue index, whereas a wider spread of points is indicative of greater uncertainty. When correlated with the results from the 3D phase error graph, it is suggested that lower \( k \) values and lower \(\beta\)  are associated with higher conditional probabilities of a phase and a greater phase error when compared to the true phase value. A sensitivity analysis could not be performed as the true distribution of the phases is unknown. 
 
 
-## \underline{Discussion of the Limitations} {-}
+## \underline{Discussion} {-}
 The results of this study demonstrate that the extrapolation behavior of the model is proficient at determining the phases for a dichromium molecule, with a low error rate observed. The posterior distribution tends to follow a normal distribution across all eigenvalues and eigenvectors, in relation to the hyperparameters \( k \) and \( \beta \). Consequently, these phases can be transformed to estimate the eigenvalues of the Hamiltonian, which in turn correspond to the discrete energy levels accessible to electrons.
 
 However, the model is subject to certain limitations. Its stochastic nature, particularly when it is assumed to be time-independent, introduces variability that can lead to different simulation outcomes despite identical initial conditions, complicating the reproducibility of results and precise behavior prediction. Additionally, as the size of the molecule increases, the assumptions integral to the stochastic model may not remain valid across all scenarios. The inherent randomness of \(k\) and \(\beta\) may not accurately reflect the molecule's actual physical attributes, leading to possible model misspecification. Computational issues, such as underflow, present further challenges; as the molecular size escalates, the number of computational basis states expands exponentially. This is predicated on the assumption that the molecule may only uniformly occupy each state, which could amplify the model's sensitivity to initial conditions. Lastly, inherent to the definition of stochastic models is the potential oversight of quantum entanglement (the superposition of states)—an essential aspect of quantum mechanics that, if not accurately represented, could induce significant errors in the modeling of the posterior of \( \phi \) \cite{Yamamoto2023}.
@@ -197,6 +197,10 @@ By addressing these challenges and limitations, the model could become a valuabl
 
 \bibliographystyle{achemso}
 \bibliography{tex/manuscript.bib}
+
+## Acknowledgements {-}
+I would like to thank Professor Roman Krems and Kasra Asnaashari for the data used, their guidance and support throughout this project. I would also like to thank the University of British Columbia for providing the resources necessary to complete this project.
+
 
 
 ## \underline{Appendix} {-} 
@@ -271,8 +275,7 @@ Refers to the set of gates or operations that a quantum computer can physically 
   \end{bmatrix}
   \]
 
+
 \includepages[pages=-]{tex/appendix_c.pdf}
 
 
-## Acknowledgements {-}
-I would like to thank Professor Roman Krems and Kasra Asnaashari for the data used, their guidance and support throughout this project. I would also like to thank the University of British Columbia for providing the resources necessary to complete this project.
